@@ -6,6 +6,8 @@ import java.util.UUID;
 
 public interface PeerService {
 
+    void cleanup();
+
     UUID register(String name, String description);
 
     void updatePosition(UUID uuid, double lat, double lon);
