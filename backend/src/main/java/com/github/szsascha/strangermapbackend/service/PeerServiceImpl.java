@@ -21,7 +21,7 @@ public class PeerServiceImpl implements PeerService {
     @Value("${peer.cleanup.timeout}")
     private long INACTIVITY_KICK_INTERVAL;
 
-    private Gson gson = new Gson();
+    private final Gson gson = new Gson();
 
     private final Jedis jedis = new Jedis();
 
