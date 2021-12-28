@@ -1,4 +1,4 @@
-package com.github.szsascha.strangermapbackend.controller;
+package com.github.szsascha.strangermapbackend.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

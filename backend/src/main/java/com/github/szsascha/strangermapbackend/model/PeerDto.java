@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class Peer {
+public class PeerDto {
 
     private String name;
 
@@ -14,7 +14,5 @@ public class Peer {
     private double lat;
 
     private double lon;
-
-    private long lastActivity;
 
 }

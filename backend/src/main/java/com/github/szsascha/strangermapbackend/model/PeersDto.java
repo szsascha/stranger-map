@@ -9,6 +9,6 @@ import java.util.List;
 @Builder
 public class PeersDto {
 
-    private List<Peer> peers;
+    private List<PeerDto> peers;
 
 }
