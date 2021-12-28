@@ -19,7 +19,7 @@ public class PeerServiceImpl implements PeerService {
     public UUID register(String name, String description) {
         final UUID uuid = UUID.randomUUID();
         if (peers.containsKey(uuid)) {
-            throw new IllegalStateException("UUID already exists");
+            throw new IllegalStateException("Peer with UUID " + uuid + " already exists");
         }
 
         this.peers.put(
@@ -35,24 +35,14 @@ public class PeerServiceImpl implements PeerService {
 
     @Override
     public void updatePosition(UUID uuid, double lat, double lon) {
-        Peer peer = peers.get(uuid);
-
-        if (peer == null) {
-            throw new IllegalStateException("UUID doesn't exist");
-        }
-
+        Peer peer = findPeerByUUID(uuid);
         peer.setLat(lat);
         peer.setLon(lon);
     }
 
     @Override
     public PeersDto getNearbyPeers(UUID uuid) {
-        final Peer ownPeer = peers.get(uuid);
-
-        if (ownPeer == null) {
-            throw new IllegalStateException("UUID doesn't exist");
-        }
-
+        final Peer ownPeer = findPeerByUUID(uuid);
         return PeersDto.builder()
                 .peers(
                         peers.entrySet().stream()
@@ -69,6 +59,14 @@ public class PeerServiceImpl implements PeerService {
                             .collect(Collectors.toList())
                 )
                 .build();
+    }
+
+    private Peer findPeerByUUID(UUID uuid) {
+        return peers.entrySet().stream()
+                .filter(entry -> entry.getKey().equals(uuid))
+                .map(Map.Entry::getValue)
+                .findAny()
+                .orElseThrow(() -> new IllegalStateException("No peer exists with UUID " + uuid));
     }
 
 }
