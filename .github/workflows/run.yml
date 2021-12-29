@@ -51,7 +51,7 @@ jobs:
 
   buidbackenddocker:
     runs-on: ubuntu-20.04
-    needs: build
+    needs: buildbackendjava
     name: Build Docker Container
     steps:
     - uses: actions/checkout@v2
