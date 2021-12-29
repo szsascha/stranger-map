@@ -5,7 +5,7 @@ import { MapComponent } from './map/map.component';
 
 const routes: Routes = [
   { path: 'join', component: JoinComponent },
-  { path: 'map', component: MapComponent },
+  { path: 'map/:uuid', component: MapComponent },
   { path: '', redirectTo: '/join', pathMatch: 'full' },
   //{ path: '**', component: PageNotFoundComponent },  
 ];
