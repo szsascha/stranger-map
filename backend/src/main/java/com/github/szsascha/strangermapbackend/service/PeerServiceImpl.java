@@ -48,8 +48,7 @@ public class PeerServiceImpl implements PeerService {
 
         // cleanup all position witthout peerdata
         jedis.zrange(PEER_POSITION_SET, 0, -1).forEach(member -> {
-            final String json = jedis.get(PEER_DATA_PREFIX + member);
-            if (json == null || json.isEmpty()) {
+            if (!containsPeerInData(UUID.fromString(member))) {
                 log.info("CLEANUP: Remove position of peer {} because no entry found in data", member);
                 jedis.zrem(PEER_POSITION_SET, member);
             }
@@ -59,7 +58,7 @@ public class PeerServiceImpl implements PeerService {
     @Override
     public UUID register(String name, String description) {
         final UUID uuid = UUID.randomUUID();
-        if (containsKey(uuid)) {
+        if (containsPeerInData(uuid)) {
             throw new IllegalStateException("Peer with UUID " + uuid + " already exists");
         }
 
@@ -123,8 +122,8 @@ public class PeerServiceImpl implements PeerService {
         return peer;
     }
 
-    private boolean containsKey(UUID uuid) {
-        String peerJson = jedis.get(uuid.toString());
+    private boolean containsPeerInData(UUID uuid) {
+        String peerJson = jedis.get(PEER_DATA_PREFIX + uuid.toString());
         return peerJson != null && !peerJson.isEmpty();
     }
 
