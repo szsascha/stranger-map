@@ -12,6 +12,7 @@ import redis.clients.jedis.Jedis;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -84,19 +85,13 @@ public class PeerServiceImpl implements PeerService {
 
     @Override
     public List<Peer> getNearbyPeers(UUID uuid) {
-        final Peer ownPeer = findPeerByUUID(uuid);
-        final List<Peer> peersNearby = new ArrayList<>();
-
         final List<GeoRadiusResponse> peersInRadius =
-                jedis.georadius(PEER_POSITION_SET, ownPeer.getLon(), ownPeer.getLat(), RADIUS_KM, GeoUnit.KM);
+                jedis.georadiusByMember(PEER_POSITION_SET, uuid.toString(), RADIUS_KM, GeoUnit.KM);
 
-        peersInRadius.stream()
+        return peersInRadius.stream()
                 .filter(geoRadiusResponse -> !geoRadiusResponse.getMemberByString().equals(uuid.toString()))
-                .forEach(geoRadiusResponse ->
-                    peersNearby.add(findPeerByUUID(UUID.fromString(geoRadiusResponse.getMemberByString())))
-                );
-
-        return peersNearby;
+                .map(geoRadiusResponse -> findPeerByUUID(UUID.fromString(geoRadiusResponse.getMemberByString())))
+                .collect(Collectors.toList());
     }
 
     private Peer findPeerByUUID(UUID uuid) {
