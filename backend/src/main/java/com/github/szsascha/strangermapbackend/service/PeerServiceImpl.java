@@ -46,7 +46,7 @@ public class PeerServiceImpl implements PeerService {
             }
         });
 
-        // cleanup all position witthout peerdata
+        // cleanup all position without peerdata
         jedis.zrange(PEER_POSITION_SET, 0, -1).forEach(member -> {
             if (!containsPeerInData(UUID.fromString(member))) {
                 log.info("CLEANUP: Remove position of peer {} because no entry found in data", member);
