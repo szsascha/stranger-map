@@ -22,7 +22,7 @@ jobs:
         working-directory: backend
         run: mvn -B compile
  
-  build:
+  buildbackendjava:
     runs-on: ubuntu-20.04
     needs: compile
     name: Build the Maven Project
@@ -49,7 +49,7 @@ jobs:
         name: stranger-map-backend.jar
         path: backend/target/stranger-map-backend-1.0.0.jar
 
-  deploy:
+  buidbackenddocker:
     runs-on: ubuntu-20.04
     needs: build
     name: Build Docker Container
@@ -64,3 +64,9 @@ jobs:
       working-directory: backend
       run: |
         docker build -t szsascha/stranger-map-backend .
+        docker save --output stranger-map-backend.dockerimage.tar szsascha/stranger-map-backend:latest
+    - name: Upload docker image
+      uses: actions/upload-artifact@v2
+      with:
+        name: stranger-map-backend.dockerimage.tar
+        path: backend/stranger-map-backend.dockerimage.tar
