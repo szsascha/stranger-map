@@ -1,11 +1,13 @@
 package com.github.szsascha.strangermapbackend.service;
 
 import com.github.szsascha.strangermapbackend.model.Peer;
-import com.github.szsascha.strangermapbackend.util.Location;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import redis.clients.jedis.GeoCoordinate;
+import redis.clients.jedis.GeoRadiusResponse;
+import redis.clients.jedis.GeoUnit;
 import redis.clients.jedis.Jedis;
 
 import java.util.*;
@@ -21,6 +23,12 @@ public class PeerServiceImpl implements PeerService {
     @Value("${peer.cleanup.timeout}")
     private long INACTIVITY_KICK_INTERVAL;
 
+    @Value("${peer.data.prefix}")
+    private String PEER_DATA_PREFIX;
+
+    @Value("${peer.position.set}")
+    private String PEER_POSITION_SET;
+
     private final Gson gson = new Gson();
 
     private final Jedis jedis = new Jedis();
@@ -31,8 +39,19 @@ public class PeerServiceImpl implements PeerService {
         final long currentTimeMillis = System.currentTimeMillis();
         iterateAllPeersAndDo(entry -> {
             if (currentTimeMillis - entry.getValue().getLastActivity() > INACTIVITY_KICK_INTERVAL) {
-                log.info("CLEANUP: Remove peer {} with UUID {} due to inactivity", entry.getValue().getName(), entry.getKey());
-                jedis.del(entry.getKey().toString());
+                final String uuidString = entry.getKey().toString();
+                log.info("CLEANUP: Remove peer {} with UUID {} due to inactivity", entry.getValue().getName(), uuidString);
+                jedis.del(PEER_DATA_PREFIX + uuidString);
+                jedis.zrem(PEER_POSITION_SET, uuidString);
+            }
+        });
+
+        // cleanup all position witthout peerdata
+        jedis.zrange(PEER_POSITION_SET, 0, -1).forEach(member -> {
+            final String json = jedis.get(PEER_DATA_PREFIX + member);
+            if (json == null || json.isEmpty()) {
+                log.info("CLEANUP: Remove position of peer {} because no entry found in data", member);
+                jedis.zrem(PEER_POSITION_SET, member);
             }
         });
     }
@@ -69,28 +88,20 @@ public class PeerServiceImpl implements PeerService {
         final Peer ownPeer = findPeerByUUID(uuid);
         final List<Peer> peersNearby = new ArrayList<>();
 
-        iterateAllPeersAndDo(entry -> {
-            if (entry.getKey().equals(uuid)) {
-                // Do not use own peer
-                return;
-            }
+        final List<GeoRadiusResponse> peersInRadius =
+                jedis.georadius(PEER_POSITION_SET, ownPeer.getLon(), ownPeer.getLat(), RADIUS_KM, GeoUnit.KM);
 
-            // TODO: Consider to do this inside of redis
-            // Check if peer is nearby
-            if (Location.distanceBetweenTwoLocationsInKm(
-                    ownPeer.getLat(),
-                    ownPeer.getLon(),
-                    entry.getValue().getLat(),
-                    entry.getValue().getLon()) <= RADIUS_KM) {
-                peersNearby.add(entry.getValue());
-            }
-        });
+        peersInRadius.stream()
+                .filter(geoRadiusResponse -> !geoRadiusResponse.getMemberByString().equals(uuid.toString()))
+                .forEach(geoRadiusResponse ->
+                    peersNearby.add(findPeerByUUID(UUID.fromString(geoRadiusResponse.getMemberByString())))
+                );
 
         return peersNearby;
     }
 
     private Peer findPeerByUUID(UUID uuid) {
-        String peerJson = jedis.get(uuid.toString());
+        String peerJson = jedis.get(PEER_DATA_PREFIX + uuid.toString());
         if (peerJson == null || peerJson.isEmpty()) {
             throw new IllegalStateException("No peer exists with UUID " + uuid);
         }
@@ -99,6 +110,15 @@ public class PeerServiceImpl implements PeerService {
         if (peer == null) {
             throw new IllegalStateException("Could not get peer with UUID " + uuid);
         }
+
+        final List<GeoCoordinate> geoCoordinateList = jedis.geopos(PEER_POSITION_SET, uuid.toString());
+        if (geoCoordinateList.size() != 1 || geoCoordinateList.get(0) == null) {
+            throw new IllegalStateException("Invalid position count for " + uuid);
+        }
+
+        final GeoCoordinate geoCoordinate = geoCoordinateList.get(0);
+        peer.setLon(geoCoordinate.getLongitude());
+        peer.setLat(geoCoordinate.getLatitude());
 
         return peer;
     }
@@ -109,15 +129,20 @@ public class PeerServiceImpl implements PeerService {
     }
 
     private void setOrUpdatePeer(UUID uuid, Peer peer) {
-        jedis.set(uuid.toString(), gson.toJson(peer));
+        jedis.set(PEER_DATA_PREFIX + uuid.toString(), gson.toJson(peer));
+        jedis.geoadd(PEER_POSITION_SET, peer.getLon(), peer.getLat(), uuid.toString());
     }
 
     private void iterateAllPeersAndDo(Consumer<Map.Entry<UUID, Peer>> consumer) {
-        Set<String> keys = jedis.keys("*");
+        Set<String> keys = jedis.keys(PEER_DATA_PREFIX + "*");
         keys.forEach(key -> {
-            final UUID uuid = UUID.fromString(key);
+            final UUID uuid = obtainUUIDFromDataKey(key);
             consumer.accept(Map.entry(uuid, findPeerByUUID(uuid)));
         });
+    }
+
+    private UUID obtainUUIDFromDataKey(String key) {
+        return UUID.fromString(key.replaceAll(PEER_DATA_PREFIX, ""));
     }
 
 }
