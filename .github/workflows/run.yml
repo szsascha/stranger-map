@@ -46,5 +46,21 @@ jobs:
     - name: Upload Maven build artifact
       uses: actions/upload-artifact@v2
       with:
-        name: artifact.jar
+        name: stranger-map-backend.jar
         path: backend/target/stranger-map-backend-1.0.0.jar
+
+  deploy:
+    runs-on: ubuntu-20.04
+    needs: build
+    name: Build Docker Container
+    steps:
+    - uses: actions/checkout@v2
+    - name: Download Maven build artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: stranger-map-backend.jar
+        path: backend/target
+    - name: Build Docker container
+      working-directory: backend
+      run: |
+        docker build -t szsascha/stranger-map-backend .
