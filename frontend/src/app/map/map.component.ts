@@ -5,10 +5,10 @@ import OSM from "ol/source/OSM";
 import * as olProj from "ol/proj";
 import TileLayer from "ol/layer/Tile";
 import { PositionService } from "../position.service";
-import { Overlay } from "ol";
-import {fromLonLat} from 'ol/proj';
 import { ApiService } from "../api.service";
-import { switchMap, withLatestFrom } from "rxjs/operators";
+import { ActivatedRoute } from "@angular/router";
+import { map, switchMap, take } from "rxjs";
+import { Overlay } from "ol";
 
 @Component({
   selector: "app-map",
@@ -17,43 +17,91 @@ import { switchMap, withLatestFrom } from "rxjs/operators";
 })
 export class MapComponent implements OnInit {
   map: Map | undefined;
-  selfMarker: any;
+  markers: any[] = [];
 
+  constructor(
+    private positionService: PositionService,
+    private apiService: ApiService,
+    private activatedRoute: ActivatedRoute,
+  ) {}
 
-  constructor(private positionService: PositionService, private apiService: ApiService) {
+  private initMapPosition(position: any) {
+    this.map?.getView().setCenter(
+      olProj.fromLonLat([position.coords.longitude, position.coords.latitude]),
+    );
+    this.map?.getView().setZoom(15);
+  }
 
-    this.apiService.session({name: 'Enrico', description: 'Gibt mir Geld!'}).subscribe(x => {
-
-      const uuid = x.uuid;
-      this.positionService.position$
-        .subscribe((position) => {
-        console.log(position!.coords);
-  
-        var element = document.createElement("div");
-        element.innerHTML = '<img src="https://cdn.mapmarker.io/api/v1/fa/stack?size=50&color=DC4C3F&icon=fa-microchip&hoffset=1" />';
-  
-        const pos = fromLonLat([position!.coords.longitude,position!.coords.latitude])
-        if(this.selfMarker){
-          this.map?.removeOverlay(this.selfMarker);
-        }
-        this.selfMarker = new Overlay({
-          position: pos,
-          positioning: "center-center",
-          element: element,
-          stopEvent: false,
-        });
-        this.map?.addOverlay(this.selfMarker);
-
-        this.apiService.peers({uuid: uuid, lat: position!.coords.latitude, lon: position!.coords.longitude}).subscribe(x => {
-          console.log(x)
-        })
-        
-      });
-    });
+  private createMarker(position: any, isPeer: boolean = false) {
+    const element = document.createElement("div");
+    if(isPeer) {
+      element.innerHTML =
+      '<img src="https://cdn.mapmarker.io/api/v1/fa/stack?size=25&color=00ff00&icon=fa-microchip&hoffset=1" />';
+    } else {
+      element.innerHTML =
+      '<img src="https://cdn.mapmarker.io/api/v1/fa/stack?size=50&color=DC4C3F&icon=fa-microchip&hoffset=1" />';
+    }
     
+
+    const pos = olProj.fromLonLat([
+      position!.coords.longitude,
+      position!.coords.latitude,
+    ]);
+
+    const marker = new Overlay({
+      position: pos,
+      positioning: "center-center",
+      element: element,
+      stopEvent: false,
+    });
+
+    return marker;
+  }
+
+  private resetMarkers() {
+    this.markers?.forEach(pm => {
+      this.map?.removeOverlay(pm);
+    })
+    this.markers = [];
   }
 
   ngOnInit(): void {
+    this.activatedRoute.params.pipe(
+      take(1),
+      map((x) => x["uuid"]),
+      switchMap((uuid) => {
+        return this.positionService.position$.pipe(
+          map((position, k) => {
+            this.resetMarkers();
+
+            if (k === 0) {
+              this.initMapPosition(position);
+            }
+
+            const marker = this.createMarker(position)
+            this.markers.push(marker);
+            this.map?.addOverlay(marker);
+            return position;
+          }),
+          switchMap(position => {
+            return this.apiService.peers({uuid: uuid, lat: position!.coords.latitude, lon: position!.coords.longitude})
+          }),
+          map((peersDto) => {
+            console.log(peersDto.peers);
+            const markers = peersDto.peers.map(x => {
+              const m = this.createMarker({coords:{longitude:x.lon,latitude:x.lat}}, true)
+              return m
+            })
+
+            markers.forEach(m => {
+              this.markers.push(m);
+              this.map?.addOverlay(m);
+            })
+          })
+        );
+      }),
+    ).subscribe();
+
     this.map = new Map({
       controls: [],
       target: "stranger-map",
@@ -64,7 +112,7 @@ export class MapComponent implements OnInit {
       ],
       view: new View({
         center: olProj.fromLonLat([7.0785, 51.4614]),
-        zoom: 5,
+        zoom: 1,
       }),
     });
   }
