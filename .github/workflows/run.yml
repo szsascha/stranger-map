@@ -47,4 +47,4 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: artifact.jar
-        path: backend/target/stranger-map-backend.jar
+        path: backend/target/stranger-map-backend-1.0.0.jar
