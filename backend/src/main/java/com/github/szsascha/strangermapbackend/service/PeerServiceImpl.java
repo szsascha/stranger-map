@@ -63,13 +63,11 @@ public class PeerServiceImpl implements PeerService {
             throw new IllegalStateException("Peer with UUID " + uuid + " already exists");
         }
 
-        final Peer peer = Peer.builder()
-                            .name(name)
-                            .description(description)
-                            .lastActivity(System.currentTimeMillis())
-                            .build();
-
-        setOrUpdatePeer(uuid, peer);
+        setOrUpdatePeer(uuid, Peer.builder()
+                .name(name)
+                .description(description)
+                .lastActivity(System.currentTimeMillis())
+                .build());
 
         return uuid;
     }
