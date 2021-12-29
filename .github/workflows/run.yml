@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        java: [ 11, 12, 13 ]
+        java: [ 11 ]
     name: Java ${{ matrix.java }} compile
     steps:
       - name: Checkout Source Code
@@ -19,7 +19,7 @@ jobs:
           java-package: jdk
           java-version: ${{ matrix.java }}
       - name: Compile the Project
-        working-directory: stranger-map/backend
+        working-directory: backend
         run: mvn -B compile
  
   build:
@@ -41,10 +41,10 @@ jobs:
           java-version: '11'
           java-package: jdk
     - name: Build and test project
-      working-directory: stranger-map/backend
+      working-directory: backend
       run: mvn -B verify
     - name: Upload Maven build artifact
       uses: actions/upload-artifact@v2
       with:
         name: artifact.jar
-        path: stranger-map/backend/target/stranger-map-backend.jar
+        path: backend/target/stranger-map-backend.jar
