@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,7 +26,7 @@ public class PeerController {
     private PeerService peerService;
 
     @PostMapping
-    ResponseEntity<PeersDto> submitPositionAndGetPeers(@RequestBody SubmitPositionDto submitPositionDto) {
+    ResponseEntity<PeersDto> submitPositionAndGetPeers(@Valid @RequestBody SubmitPositionDto submitPositionDto) {
         log.info("Update position of peer {} to {}, {}", submitPositionDto.getUuid(), submitPositionDto.getLat(), submitPositionDto.getLon());
         peerService.updatePosition(
                 submitPositionDto.getUuid(),

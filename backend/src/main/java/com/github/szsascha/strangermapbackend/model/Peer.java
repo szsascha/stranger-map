@@ -11,9 +11,11 @@ public class Peer {
 
     private String description;
 
-    private double lat;
+    // Don't use it in Redis since position is stored separately
+    private transient double lat;
 
-    private double lon;
+    // Don't use it in Redis since position is stored separately
+    private transient double lon;
 
     private long lastActivity;
 
