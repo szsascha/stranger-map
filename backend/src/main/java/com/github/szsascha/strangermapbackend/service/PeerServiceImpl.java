@@ -3,6 +3,7 @@ package com.github.szsascha.strangermapbackend.service;
 import com.github.szsascha.strangermapbackend.model.Peer;
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import redis.clients.jedis.GeoCoordinate;
@@ -32,7 +33,15 @@ public class PeerServiceImpl implements PeerService {
 
     private final Gson gson = new Gson();
 
-    private final Jedis jedis = new Jedis();
+    private final Jedis jedis;
+
+    @Autowired
+    public PeerServiceImpl(
+            @Value("${redis.host}") String redisHost,
+            @Value("${redis.port}") int redisPort
+    ) {
+        jedis = new Jedis(redisHost, redisPort);
+    }
 
     @Override
     public void cleanup() {
