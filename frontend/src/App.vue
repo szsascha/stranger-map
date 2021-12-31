@@ -1,60 +1,65 @@
 <template>
-  <v-app>
-    <v-app-bar
-      app
-      color="primary"
-      dark
-    >
-      <div class="d-flex align-center">
-        <v-img
-          alt="Vuetify Logo"
-          class="shrink mr-2"
-          contain
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-logo-dark.png"
-          transition="scale-transition"
-          width="40"
-        />
-
-        <v-img
-          alt="Vuetify Name"
-          class="shrink mt-1 hidden-sm-and-down"
-          contain
-          min-width="100"
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-name-dark.png"
-          width="100"
-        />
-      </div>
-
-      <v-spacer></v-spacer>
-
-      <v-btn
-        href="https://github.com/vuetifyjs/vuetify/releases/latest"
-        target="_blank"
-        text
-      >
-        <span class="mr-2">Latest Release</span>
-        <v-icon>mdi-open-in-new</v-icon>
-      </v-btn>
-    </v-app-bar>
-
-    <v-main>
-      <HelloWorld/>
-    </v-main>
-  </v-app>
+   <div id="app"></div>
+</template>
+<template>
+   <v-app id="app">
+      <template v-if="!$route.path.includes('login')">
+         <v-navigation-drawer v-model="drawer" fixed app>
+            <v-toolbar flat dark color="success">
+               <v-list>
+                  <v-list-tile>
+                     <v-list-tile-title class="title">
+                        Stranger Map
+                     </v-list-tile-title>
+                  </v-list-tile>
+               </v-list>
+            </v-toolbar>
+            <v-list dense>
+               <v-list-tile @click="drawer = false;" to="/join">
+                  <v-list-tile-action>
+                     <v-icon>home</v-icon>
+                  </v-list-tile-action>
+                  <v-list-tile-content>
+                     <v-list-tile-title>Join</v-list-tile-title>
+                  </v-list-tile-content>
+               </v-list-tile>
+            </v-list>
+         </v-navigation-drawer>
+         <v-toolbar color="primary" dark fixed app>
+            <v-toolbar-side-icon
+               @click.stop="drawer = !drawer;"
+            ></v-toolbar-side-icon>
+            <v-toolbar-title>Application</v-toolbar-title>
+         </v-toolbar>
+      </template>
+      <v-content>
+         <keep-alive :include="['Join']">
+            <router-view></router-view>
+         </keep-alive>
+      </v-content>
+   </v-app>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld';
-
 export default {
-  name: 'App',
-
-  components: {
-    HelloWorld,
-  },
-
-  data: () => ({
-    //
-  }),
+   data: () => ({
+      drawer: false,
+   }),
+   props: {
+      source: String,
+   },
 };
 </script>
+
+<script>
+export default {
+   name: 'App',
+   data() {
+      return {
+         drawer: false,
+      };
+   },
+};
+</script>
+
+<style></style>
