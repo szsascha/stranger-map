@@ -15,6 +15,7 @@
                               name="name"
                               label="Name"
                               type="text"
+                              v-model="username"
                            ></v-text-field>
                            <v-textarea
                               id="description"
@@ -22,12 +23,13 @@
                               name="description"
                               label="Description"
                               type="text"
+                              v-model="description"
                            ></v-textarea>
                         </v-form>
                      </v-card-text>
                      <v-card-actions>
                         <v-spacer></v-spacer>
-                        <v-btn color="primary" to="/map">Join</v-btn>
+                        <v-btn color="primary" @click="join">Join</v-btn>
                      </v-card-actions>
                   </v-card>
                </v-flex>
@@ -38,11 +40,48 @@
 </template>
 
 <script>
+import Vue from 'vue'
+
 export default {
    name: 'Join',
    props: {
       source: String,
    },
+   data() {
+       return {
+        username: '',
+        description: ''
+       }
+   },
+   methods: {
+       join() {
+            fetch("http://localhost:8081/api/session", {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: this.username,
+                    description: this.description
+                })
+            })
+            .then(response => { 
+                if(response.ok){
+                    return response.json();
+                } else{
+                    alert("Server returned " + response.status + " : " + response.statusText);
+                }                
+            })
+            .then(response => {
+                    Vue.prototype.uuid = response.uuid;
+                    this.$router.push('map');
+            })
+            .catch(err => {
+                console.log(err);
+            });
+        }
+       
+   }
 };
 </script>
 

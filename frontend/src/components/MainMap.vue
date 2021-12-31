@@ -4,7 +4,7 @@
             @click="onMapClick" data-projection="EPSG:4326">
       <vl-view :zoom.sync="zoom" :center.sync="geolocPosition" :rotation.sync="rotation"></vl-view>
 
-      <vl-geoloc @update:position="geolocPosition = $event">
+      <vl-geoloc @update:position="updatePosition">
         <template slot-scope="geoloc">
           <vl-feature v-if="geoloc.position" id="peer4711">
             <vl-geom-point :coordinates="geoloc.position"></vl-geom-point>
@@ -52,6 +52,8 @@
 
 <script>
 
+import Vue from 'vue'
+
 const controls = {
   zoom: false,
   attribution: false,
@@ -84,6 +86,12 @@ export default {
                 let element = features[0].getId() + 'description';
                 this.descriptions[element] = true;
             }
+
+            console.log(Vue.prototype.uuid);
+        },
+        updatePosition (event) {
+            this.geolocPosition = event
+            console.log(event);
         }
     }
 }
