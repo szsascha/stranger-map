@@ -4,36 +4,40 @@
             @click="onMapClick" data-projection="EPSG:4326">
       <vl-view :zoom.sync="zoom" :center.sync="geolocPosition" :rotation.sync="rotation"></vl-view>
 
+    <template :id="'peer-' + index" v-for="(peer, index) in peers">
+        <vl-feature :key="index" :id="index">
+            <vl-geom-point :coordinates="[peer.lon, peer.lat]"></vl-geom-point>
+            <vl-style-box>
+                <vl-style-text text="😀" font="3.0em sans-serif"></vl-style-text>
+            </vl-style-box>
+
+            <vl-overlay v-show="peer.showDescription" :offset="overlayOffset" :position="[peer.lon, peer.lat]">
+                <template>
+                    <v-card hover>                       
+                        <v-card-text>
+                            {{ peer.description }}
+                        </v-card-text>
+                        
+                        <!--<v-card-actions>
+                            <v-btn color=success>Click #1</v-btn>
+                            <v-btn text color=primary>Click #2</v-btn>
+                            <v-spacer></v-spacer>
+                            <v-btn icon><v-icon>bookmark</v-icon></v-btn>
+                        </v-card-actions>-->
+                    </v-card>
+                </template>
+            </vl-overlay>
+          </vl-feature>
+    </template>
+
+    <!-- own peer -->
       <vl-geoloc @update:position="updatePosition">
         <template slot-scope="geoloc">
           <vl-feature v-if="geoloc.position" id="peer4711">
             <vl-geom-point :coordinates="geoloc.position"></vl-geom-point>
             <vl-style-box>
-                <vl-style-text text="😀" font="3.0em sans-serif">x</vl-style-text>
+                <vl-style-text text="😀" font="3.0em sans-serif"></vl-style-text>
             </vl-style-box>
-
-            <vl-overlay v-show="descriptions.peer4711description" :offset="overlayOffset" :position="geoloc.position">
-                <template slot-scope="scope">
-                    <v-card hover>
-                        <v-card-title>
-                            <h2>Description</h2>
-                        </v-card-title>
-                        
-                        <v-card-text>
-                            line 1<br>
-                            line 2<br>
-                            {{ scope.position }}
-                        </v-card-text>
-                        
-                        <v-card-actions>
-                            <v-btn color=success>Click #1</v-btn>
-                            <v-btn text color=primary>Click #2</v-btn>
-                            <v-spacer></v-spacer>
-                            <v-btn icon><v-icon>bookmark</v-icon></v-btn>
-                        </v-card-actions>
-                    </v-card>
-                </template>
-            </vl-overlay>
           </vl-feature>
         </template>
       </vl-geoloc>
@@ -42,11 +46,6 @@
         <vl-source-osm></vl-source-osm>
       </vl-layer-tile>
     </vl-map>
-    <div style="padding: 20px">
-      Zoom: {{ zoom }}<br>
-      Rotation: {{ rotation }}<br>
-      My geolocation: {{ geolocPosition }}
-    </div>
   </div>
 </template>
 
@@ -68,30 +67,52 @@ export default {
         geolocPosition: undefined,
         controls: controls,
         overlayOffset: [25, -25],
-        showDescription: false,
-        descriptions: {
-            peer4711description: false
-        }
+        peers: []
       }
     },
     methods: {
         onMapClick (event) {
             let features = this.$refs.map.$map.getFeaturesAtPixel(event.pixel)
-            Object.entries(this.descriptions).forEach(entry => {
-                const key = entry[0];
-                this.descriptions[key] = false;
+            this.peers.forEach((peer) => {
+                peer.showDescription = false;
             });
 
             if (features !== null && features.length > 0) {
-                let element = features[0].getId() + 'description';
-                this.descriptions[element] = true;
+                this.peers[features[0].getId()].showDescription = true;
             }
-
-            console.log(Vue.prototype.uuid);
         },
         updatePosition (event) {
             this.geolocPosition = event
             console.log(event);
+
+            fetch("http://localhost:8081/api/peers", {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    uuid: Vue.prototype.uuid,
+                    lat: event[1],
+                    lon: event[0]
+                })
+            })
+            .then(response => { 
+                if(response.ok){
+                    return response.json();
+                } else{
+                    console.err("Server returned " + response.status + " : " + response.statusText);
+                }                
+            })
+            .then(response => {
+                response.peers.forEach(peer => {
+                    peer.showDescription = false;
+                });
+                console.log(response.peers);
+                this.peers = response.peers;
+            })
+            .catch(err => {
+                console.log(err);
+            });
         }
     }
 }
