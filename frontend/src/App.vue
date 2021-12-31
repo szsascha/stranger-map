@@ -2,42 +2,18 @@
    <div id="app"></div>
 </template>
 <template>
-   <v-app id="app">
-      <template v-if="!$route.path.includes('login')">
-         <v-navigation-drawer v-model="drawer" fixed app>
-            <v-toolbar flat dark color="success">
-               <v-list>
-                  <v-list-tile>
-                     <v-list-tile-title class="title">
-                        Stranger Map
-                     </v-list-tile-title>
-                  </v-list-tile>
-               </v-list>
-            </v-toolbar>
-            <v-list dense>
-               <v-list-tile @click="drawer = false;" to="/join">
-                  <v-list-tile-action>
-                     <v-icon>home</v-icon>
-                  </v-list-tile-action>
-                  <v-list-tile-content>
-                     <v-list-tile-title>Join</v-list-tile-title>
-                  </v-list-tile-content>
-               </v-list-tile>
-            </v-list>
-         </v-navigation-drawer>
-         <v-toolbar color="primary" dark fixed app>
-            <v-toolbar-side-icon
-               @click.stop="drawer = !drawer;"
-            ></v-toolbar-side-icon>
-            <v-toolbar-title>Application</v-toolbar-title>
-         </v-toolbar>
+  <v-app id="app">
+    <v-content style="overflow:auto">
+      <template v-if="!$route.path.includes('join')"> 
+        <v-app-bar flat dark color="primary">
+          <v-toolbar-title>Stranger Map</v-toolbar-title>
+        </v-app-bar>
       </template>
-      <v-content>
-         <keep-alive :include="['Join']">
-            <router-view></router-view>
-         </keep-alive>
-      </v-content>
-   </v-app>
+      <keep-alive :include="['Join']">
+        <router-view></router-view>
+      </keep-alive>
+    </v-content>
+  </v-app>
 </template>
 
 <script>
