@@ -15,11 +15,7 @@ Vue.config.productionTip = false
 Vue.use(VueRouter);
 Vue.use(VueLayers);
 
-Vue.use(vuetify, {
-  theme: {
-     primary: '#7957d5',
-  },
-});
+Vue.use(vuetify);
 
 const router = new VueRouter({
   routes: [

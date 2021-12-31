@@ -8,7 +8,7 @@
         <vl-feature :key="index" :id="index">
             <vl-geom-point :coordinates="[peer.lon, peer.lat]"></vl-geom-point>
             <vl-style-box>
-                <vl-style-text text="😀" font="3.0em sans-serif"></vl-style-text>
+                <vl-style-text :text="peer.name" font="3.0em sans-serif"></vl-style-text>
             </vl-style-box>
 
             <vl-overlay v-show="peer.showDescription" :offset="overlayOffset" :position="[peer.lon, peer.lat]">
@@ -33,10 +33,10 @@
     <!-- own peer -->
       <vl-geoloc @update:position="updatePosition">
         <template slot-scope="geoloc">
-          <vl-feature v-if="geoloc.position" id="peer4711">
+          <vl-feature v-if="geoloc.position">
             <vl-geom-point :coordinates="geoloc.position"></vl-geom-point>
             <vl-style-box>
-                <vl-style-text text="😀" font="3.0em sans-serif"></vl-style-text>
+                <vl-style-text :text="ownname" font="3.0em sans-serif"></vl-style-text>
             </vl-style-box>
           </vl-feature>
         </template>
@@ -60,7 +60,7 @@ const controls = {
 }
 
 export default {
-   data () {
+    data () {
       return { 
         zoom: 18,
         rotation: 0,
@@ -83,7 +83,6 @@ export default {
         },
         updatePosition (event) {
             this.geolocPosition = event
-            console.log(event);
 
             fetch("http://localhost:8081/api/peers", {
                 method: "POST",
@@ -107,7 +106,6 @@ export default {
                 response.peers.forEach(peer => {
                     peer.showDescription = false;
                 });
-                console.log(response.peers);
                 this.peers = response.peers;
             })
             .catch(err => {

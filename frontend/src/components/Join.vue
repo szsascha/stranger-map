@@ -10,18 +10,23 @@
                      </v-toolbar>
                      <v-card-text>
                         <v-form>
-                           <v-text-field
-                              prepend-icon="person"
-                              name="name"
-                              label="Name"
-                              type="text"
-                              v-model="username"
-                           ></v-text-field>
+                        <div class="overflow-y-auto">
+                        <v-btn-toggle
+                        v-model="username"
+                        tile
+                        color="blue darken-3"
+                        group
+                        >
+                        <v-btn value="😁" style="font-size: 3em">😁</v-btn> 
+                        <v-btn value="🥸" style="font-size: 3em">🥸</v-btn> 
+                        <v-btn value="😎" style="font-size: 3em">😎</v-btn> 
+                        <v-btn value="🤠" style="font-size: 3em">🤠</v-btn> 
+                        <v-btn value="🙂" style="font-size: 3em">🙂</v-btn> 
+                        </v-btn-toggle></div>
                            <v-textarea
                               id="description"
-                              prepend-icon="description"
                               name="description"
-                              label="Description"
+                              label="A short description about yourself (max. 500 characters)"
                               type="text"
                               v-model="description"
                            ></v-textarea>
@@ -74,6 +79,7 @@ export default {
             })
             .then(response => {
                     Vue.prototype.uuid = response.uuid;
+                    Vue.prototype.ownname = this.username;
                     this.$router.push('map');
             })
             .catch(err => {
