@@ -73,6 +73,11 @@ export default {
     methods: {
         onMapClick (event) {
             let features = this.$refs.map.$map.getFeaturesAtPixel(event.pixel)
+            if (features == null) {
+                return;
+            }
+
+            features = features.filter(feature => Number.isInteger(feature.getId()));
             this.peers.forEach((peer) => {
                 peer.showDescription = false;
             });
