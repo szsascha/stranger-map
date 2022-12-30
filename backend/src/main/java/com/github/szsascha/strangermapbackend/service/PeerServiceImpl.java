@@ -6,9 +6,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import redis.clients.jedis.GeoCoordinate;
-import redis.clients.jedis.GeoRadiusResponse;
-import redis.clients.jedis.GeoUnit;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.args.GeoUnit;
+import redis.clients.jedis.resps.GeoRadiusResponse;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -126,7 +126,7 @@ public class PeerServiceImpl implements PeerService {
     }
 
     private void iterateAllPeersAndDo(Consumer<Map.Entry<UUID, Peer>> consumer) {
-        Set<String> keys = jedis.keys(PEER_DATA_PREFIX + "*");
+        Set<String> keys = jedis.keys(PEER_DATA_PREFIX + '*');
         keys.forEach(key -> {
             final UUID uuid = obtainUUIDFromDataKey(key);
             consumer.accept(Map.entry(uuid, findPeerByUUID(uuid)));
