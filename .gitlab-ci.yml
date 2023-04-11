@@ -15,7 +15,7 @@ before_script:
 
 build:
   stage: build
-  image: gradle:jdk11-alpine
+  image: gradle:jdk17-alpine
   script:
     - cd backend/
     - gradle --build-cache assemble
@@ -28,7 +28,7 @@ build:
 
 test:
   stage: test
-  image: gradle:jdk11-alpine
+  image: gradle:jdk17-alpine
   script:
     - cd backend/
     - gradle check
