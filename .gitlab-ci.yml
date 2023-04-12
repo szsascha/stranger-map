@@ -1,13 +1,8 @@
-# You can copy and paste this template into a new `.gitlab-ci.yml` file.
-# You should not add this template to an existing `.gitlab-ci.yml` file by using the `include:` keyword.
-# To contribute improvements to CI/CD templates, please follow the Development guide at:
-# https://docs.gitlab.com/ee/development/cicd/templates.html
-# This specific template is located at:
-# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Gradle.gitlab-ci.yml
-
-# This is the Gradle build system for JVM applications
-# https://gradle.org/
-# https://github.com/gradle/gradle
+stages:
+  - build
+  - test
+  - dist
+  - deploy
 
 before_script:
   - GRADLE_USER_HOME="$(pwd)/backend/.gradle"
@@ -40,7 +35,7 @@ test_backend:
       - .gradle
 
 build_backend_dockerfile:
-  stage: build
+  stage: dist
   image:
     name: gcr.io/kaniko-project/executor:v1.9.0-debug
     entrypoint: [""]
