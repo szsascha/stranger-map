@@ -14,6 +14,9 @@ build_backend:
   script:
     - cd backend/
     - gradle --build-cache assemble
+  artifacts:
+    paths:
+      - backend/build/libs/*.jar
   cache:
     key: "$CI_COMMIT_REF_NAME"
     policy: push
