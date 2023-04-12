@@ -1,15 +1,15 @@
 stages:
-  - build
-  - test
-  - dist
-  - deploy
+  - Build
+  - Test
+  - Dist
+  - Deploy
 
 before_script:
   - GRADLE_USER_HOME="$(pwd)/backend/.gradle"
   - export GRADLE_USER_HOME
 
-build_backend:
-  stage: build
+Build Backend:
+  stage: Build
   image: gradle:jdk17-alpine
   script:
     - cd backend/
@@ -24,8 +24,8 @@ build_backend:
       - build
       - .gradle
 
-test_backend:
-  stage: test
+Test Backend:
+  stage: Test
   image: gradle:jdk17-alpine
   script:
     - cd backend/
@@ -37,20 +37,20 @@ test_backend:
       - build
       - .gradle
 
-build_backend_dockerfile:
-  stage: dist
+Build Backend Dockerfile:
+  stage: Dist
   image:
     name: gcr.io/kaniko-project/executor:v1.9.0-debug
     entrypoint: [""]
   dependencies:
-    - build_backend
+    - Build Backend
   script:
     - /kaniko/executor
       --context "${CI_PROJECT_DIR}/backend"
       --dockerfile "${CI_PROJECT_DIR}/backend/Dockerfile"
       --destination "${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}"
 
-deploy:
-  stage: deploy
+Deploy:
+  stage: Deploy
   script: echo "Define your deployment script!"
   environment: production
