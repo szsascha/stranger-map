@@ -1,9 +1,7 @@
-FROM adoptopenjdk/openjdk17:alpine-jre
-ENV ARTIFACT_NAME=stranger-map-backend-1.0.0.jar
-ENV APP_HOME=/usr/app/
-
-WORKDIR $APP_HOME
-COPY --from=TEMP_BUILD_IMAGE $APP_HOME/build/libs/$ARTIFACT_NAME .
+FROM eclipse-temurin:17-jre
 
 EXPOSE 8080
-ENTRYPOINT exec java -jar ${ARTIFACT_NAME}
+
+COPY build/libs/stranger-map-backend-*.jar /usr/app/stranger-map-backend.jar
+
+ENTRYPOINT java $JAVA_OPTS -jar /usr/app/stranger-map-backend.jar
