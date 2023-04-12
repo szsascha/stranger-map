@@ -13,7 +13,7 @@ before_script:
   - GRADLE_USER_HOME="$(pwd)/backend/.gradle"
   - export GRADLE_USER_HOME
 
-build:
+build_backend:
   stage: build
   image: gradle:jdk17-alpine
   script:
@@ -26,7 +26,7 @@ build:
       - build
       - .gradle
 
-test:
+test_backend:
   stage: test
   image: gradle:jdk17-alpine
   script:
@@ -38,6 +38,17 @@ test:
     paths:
       - build
       - .gradle
+
+build_backend_dockerfile:
+  stage: build
+  image:
+    name: gcr.io/kaniko-project/executor:v1.9.0-debug
+    entrypoint: [""]
+  script:
+    - /kaniko/executor
+      --context "${CI_PROJECT_DIR}/backend"
+      --dockerfile "${CI_PROJECT_DIR}/backend/Dockerfile"
+      --destination "${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}"
 
 deploy:
   stage: deploy
