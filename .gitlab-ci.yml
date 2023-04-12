@@ -39,6 +39,8 @@ build_backend_dockerfile:
   image:
     name: gcr.io/kaniko-project/executor:v1.9.0-debug
     entrypoint: [""]
+  dependencies:
+    - build_backend
   script:
     - /kaniko/executor
       --context "${CI_PROJECT_DIR}/backend"
