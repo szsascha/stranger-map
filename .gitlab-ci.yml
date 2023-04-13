@@ -2,6 +2,8 @@ stages:
   - Build
   - Test
   - Dist
+  - Prepare Deployment
+  - Push Deployment
   - Deploy
 
 before_script:
@@ -49,6 +51,26 @@ Build Backend Dockerfile:
       --context "${CI_PROJECT_DIR}/backend"
       --dockerfile "${CI_PROJECT_DIR}/backend/Dockerfile"
       --destination "${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}"
+
+Build Backend Helm Chart:
+  stage: Prepare Deployment
+  image: dtzar/helm-kubectl:3.11.2
+  dependencies:
+    - Build Backend Dockerfile
+  artifacts:
+    paths:
+      - stranger-map-backend-chart.yml
+      - stranger-map-backend-1.0.0.tgz
+  script:
+    - helm template devops/charts/backend > stranger-map-backend-chart.yml
+
+Push Backend Helm Chart:
+  stage: Push Deployment
+  image: alpine/helm:3.11.2
+  dependencies:
+    - Build Backend Helm Chart
+  script:
+    - helm push stranger-map-backend-1.0.0.tgz stranger-map-backend
 
 Deploy:
   stage: Deploy
