@@ -66,11 +66,11 @@ Build Backend Helm Chart:
 
 Push Backend Helm Chart:
   stage: Push Deployment
-  image: alpine/helm:3.11.2
+  image: curlimages/curl:latest
   dependencies:
     - Build Backend Helm Chart
   script:
-    - helm push stranger-map-backend-1.0.0.tgz stranger-map-backend
+    - 'curl --request POST --user gitlab-ci-token:$CI_JOB_TOKEN --form "chart=@stranger-map-backend-1.0.0.tgz" "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/helm/api/stable/charts"'
 
 Deploy:
   stage: Deploy
