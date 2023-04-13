@@ -77,7 +77,7 @@ Deploy:
   stage: Deploy
   image: alpine/helm:3.11.1
   script:
-    - helm upgrade --namespace stranger-map --install stranger-map-backend stranger-map/stranger-map-backend
+    - helm upgrade --namespace stranger-map --create-namespace --install stranger-map-backend stranger-map/stranger-map-backend
   rules:
     - if: $CI_COMMIT_BRANCH == 'devops'
       when: always
