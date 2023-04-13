@@ -75,5 +75,9 @@ Push Backend Helm Chart:
 
 Deploy:
   stage: Deploy
-  script: echo "Define your deployment script!"
-  environment: production
+  image: alpine/helm:3:11:1
+  script:
+    - helm upgrade stranger-map-backend --install --namespace stranger-map
+  rules:
+    - if: $CI_COMMIT_BRANCH == 'devops'
+      when: always
