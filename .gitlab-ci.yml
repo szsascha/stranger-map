@@ -75,7 +75,7 @@ Push Backend Helm Chart:
 
 Deploy:
   stage: Deploy
-  image: alpine/helm:3:11:1
+  image: alpine/helm:3.11.1
   script:
     - helm upgrade stranger-map-backend --install --namespace stranger-map
   rules:
