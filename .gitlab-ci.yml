@@ -63,6 +63,7 @@ Build Backend Helm Chart:
       - stranger-map-backend-1.0.0.tgz
   script:
     - helm template devops/charts/backend > stranger-map-backend-chart.yml
+    - helm package devops/charts/backend
 
 Push Backend Helm Chart:
   stage: Push Deployment
