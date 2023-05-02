@@ -85,3 +85,4 @@ Deploy:
   rules:
     - if: $CI_COMMIT_BRANCH == 'devops'
       when: always
+      
