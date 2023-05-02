@@ -79,7 +79,7 @@ Deploy:
   dependencies:
     - Push Backend Helm Chart
   script:
-    - helm repo add --username gitlab-ci-token --password $CI_JOB_TOKEN stranger-map $CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/helm/api/stable/charts
+    - helm repo add --username gitlab-ci-token --password $CI_JOB_TOKEN stranger-map $CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/helm/stable
     - helm update
     - helm upgrade --namespace stranger-map --create-namespace --install stranger-map-backend stranger-map/stranger-map-backend
   rules:
