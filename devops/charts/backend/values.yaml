@@ -9,8 +9,7 @@ imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
-runners:
-  serviceAccountName: "stranger-map-operator"
+serviceAccountName: "sa-runner"
 
 serviceAccount:
   # Specifies whether a service account should be created
