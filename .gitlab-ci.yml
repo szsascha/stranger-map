@@ -86,9 +86,7 @@ Deploy:
        [[runners]]
          [runners.kubernetes]
            namespace = "{{.Release.Namespace}}"
-           service_account = "{{ include "gitlab-runner.fullname" . }}"
-       EOF
-       )
+           service_account = "{{ include "gitlab-runner.fullname" . }}")
     - helm upgrade --set runners.config=$MULTILINE_RUNNER_CONFIG --namespace stranger-map --create-namespace --install stranger-map-backend stranger-map/stranger-map-backend
   rules:
     - if: $CI_COMMIT_BRANCH == 'devops'
