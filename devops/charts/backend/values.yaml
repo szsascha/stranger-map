@@ -4,7 +4,7 @@ image:
   #repository: stranger-map-backend
   repository: stranger-map
   pullPolicy: IfNotPresent
-  tag: "latest"
+  tag: "0b84458a"
 
 nameOverride: ""
 fullnameOverride: ""
