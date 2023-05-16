@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   #repository: stranger-map-backend
-  repository: registry.devops.szsascha.cloud/stranger-map
+  repository: registry.devops.szsascha.cloud/stranger-map/stranger-map
   pullPolicy: IfNotPresent
   tag: "0b84458a"
 
