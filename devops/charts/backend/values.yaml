@@ -5,7 +5,7 @@ image:
   pullPolicy: IfNotPresent
   tag: "latest"
 
-imagePullSecrets: [ "registry-credentials" ]
+imagePullSecrets: [ registry-credentials ]
 nameOverride: ""
 fullnameOverride: ""
 
